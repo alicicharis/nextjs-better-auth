@@ -12,15 +12,16 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: true,
   },
-
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+  },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }, request) => {
-      // console.log("User: ", user);
-      // console.log("Url: ", url);
-      // console.log("Token: ", token);
-      // console.log("Request: ", request);
       await sendEmail({
         to: user.email,
         subject: "Verify your email address",
@@ -28,12 +29,12 @@ export const auth = betterAuth({
       });
     },
   },
-  //   socialProviders: {
-  //     google: {
-  //       clientId: process.env.GOOGLE_CLIENT_ID!,
-  //       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  //     },
-  //   },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
 });
 
 export const getSession = async () => {

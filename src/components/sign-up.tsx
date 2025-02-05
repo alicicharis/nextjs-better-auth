@@ -44,7 +44,7 @@ export default function SignUp() {
         name: data.name,
       },
       {
-        onSuccess: (ctx) => {
+        onSuccess: (_) => {
           router.push("/");
         },
         onError: (ctx) => {
