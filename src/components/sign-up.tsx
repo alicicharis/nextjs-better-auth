@@ -1,30 +1,51 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import { signUp } from "@/lib/auth-client";
+import {
+  Form,
+  FormItem,
+  FormControl,
+  FormLabel,
+  FormMessage,
+  FormField,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+
+const signupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  name: z.string().min(3),
+});
+
+type SignupSchema = z.infer<typeof signupSchema>;
 
 export default function SignUp() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const router = useRouter();
 
-  const signUp = async () => {
-    const { data, error } = await authClient.signUp.email(
+  const form = useForm<SignupSchema>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      name: "",
+    },
+  });
+
+  const signUpHandler = async (data: SignupSchema) => {
+    await signUp.email(
       {
-        email,
-        password,
-        name,
-        image: image ? undefined : undefined,
+        email: data.email,
+        password: data.password,
+        name: data.name,
       },
       {
-        onRequest: (ctx) => {
-          console.log("Ctx: ", ctx);
-          //show loading
-        },
         onSuccess: (ctx) => {
-          //redirect to the dashboard
-          console.log("Success: ", ctx);
+          router.push("/");
         },
         onError: (ctx) => {
           console.log("Error: ", ctx);
@@ -35,33 +56,54 @@ export default function SignUp() {
   };
 
   return (
-    <div>
-      <input
-        type="name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Name"
-        className="text-black"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        className="text-black"
-      />
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        className="text-black"
-      />
-      <input
-        type="file"
-        onChange={(e) => setImage(e?.target?.files?.[0] ?? null)}
-      />
-      <button onClick={signUp}>Sign Up</button>
-    </div>
+    <>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(signUpHandler)}
+          className="w-[400px] flex flex-col gap-4"
+        >
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Email" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Name" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input {...field} type="password" placeholder="Password" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">Sign Up</Button>
+        </form>
+      </Form>
+    </>
   );
 }
